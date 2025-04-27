@@ -40,7 +40,7 @@ const Dashboard = () => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/items') // backend URL
+    fetch('https://m-ock-pro-backend.vercel.app/api/items') // backend URL
       .then((res) => res.json())
       .then((data) => setItems(data))
       .catch((err) => console.error('Error fetching data:', err));
@@ -53,7 +53,7 @@ const Dashboard = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/vapi/generate-text", {
+      const response = await fetch("https://m-ock-pro-backend.vercel.app/api/vapi/generate-text", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
