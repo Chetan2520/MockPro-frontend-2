@@ -1,40 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-
+import MagneticButton from './MagneticButton';
 // Utility function for class names
 const cn = (...inputs) => {
   return twMerge(clsx(inputs));
 };
 
-// Button Component
-const Button = React.forwardRef(({ className, variant = "default", size = "default", ...props }, ref) => {
-  const baseStyles = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-purple-500 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-105";
-
-  const variants = {
-    default: "bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 shadow-lg hover:shadow-purple-500/40",
-    destructive: "bg-red-500 text-white hover:bg-red-600",
-    outline: "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
-    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
-    link: "text-primary underline-offset-4 hover:underline",
-  };
-
-  const sizes = {
-    default: "h-10 px-6 py-2",
-    sm: "h-8 rounded-md px-3 text-xs",
-    lg: "h-12 rounded-md px-8 text-lg",
-    icon: "h-9 w-9",
-  };
-
-  return (
-    <button
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
-      ref={ref}
-      {...props}
-    />
-  );
-});
 
 // Input Component
 const Input = React.forwardRef(({ className, type, ...props }, ref) => {
@@ -56,7 +28,7 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl border border-purple-500/20 bg-black/40 shadow-xl backdrop-blur-sm",
+      "rounded-2xl border h-80  border-purple-500/20 bg-black/40 shadow-xl backdrop-blur-sm",
       className
     )}
     {...props}
@@ -65,6 +37,14 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
 
 // Main Dashboard Component
 const Dashboard = () => {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/items') // backend URL
+      .then((res) => res.json())
+      .then((data) => setItems(data))
+      .catch((err) => console.error('Error fetching data:', err));
+  }, []);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -99,19 +79,18 @@ const Dashboard = () => {
       <div className="relative z-10 p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-center mb-12">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              PrepWise
-            </h1>
-          </div>
-
+         
           {/* Interview Generation Section */}
-          <div className="mb-12">
-            <h2 className="text-2xl text-center mb-12 font-semibold text-gray-200">
-              Interview Generation
-            </h2>
+          <div className="mb-12 ">
+          {items.map((item)=>{
+            <div key={item._id} className='flex  justify-between px-10 py-5 mt-16'>
+          <h1 className='text-2xl italic font-semibold text-zinc-300'></h1>
+          <h3 className='bg-zinc-900 rounded-xl px-4 py-2'>{item.type}</h3>
+          </div>
+          })}
+           
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8  ">
               {/* AI Interviewer Card */}
               <Card className="p-8 flex flex-col items-center justify-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center mb-6 shadow-lg overflow-hidden">
@@ -146,9 +125,9 @@ const Dashboard = () => {
                   className="mb-6"
                 />
                 <div className="flex justify-center">
-                  <Button size="lg" onClick={handleStartInterview} disabled={loading}>
+                  <MagneticButton size="lg" onClick={handleStartInterview} disabled={loading}>
                     {loading ? "Starting..." : "Start Interview"}
-                  </Button>
+                  </MagneticButton>
                 </div>
               </div>
             </div>
@@ -160,7 +139,7 @@ const Dashboard = () => {
 };
 
 // Add display names for components
-Button.displayName = "Button";
+// MagneticButton.displayName = "Button";
 Input.displayName = "Input";
 Card.displayName = "Card";
 
