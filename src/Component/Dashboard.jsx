@@ -1,20 +1,19 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import MagneticButton from './MagneticButton';
-// Utility function for class names
+import { motion, AnimatePresence } from 'framer-motion';
+
 const cn = (...inputs) => {
   return twMerge(clsx(inputs));
 };
 
-
-// Input Component
 const Input = React.forwardRef(({ className, type, ...props }, ref) => {
   return (
     <input
       type={type}
       className={cn(
-        "flex h-12 w-full rounded-lg border border-purple-500/20 bg-white/5 px-4 py-2 text-base shadow-lg backdrop-blur-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-12 w-full rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-base shadow-lg backdrop-blur-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 focus-visible:border-zinc-700 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       ref={ref}
@@ -23,35 +22,54 @@ const Input = React.forwardRef(({ className, type, ...props }, ref) => {
   );
 });
 
-// Card Component
 const Card = React.forwardRef(({ className, ...props }, ref) => (
-  <div
+  <motion.div
     ref={ref}
+    whileHover={{ scale: 1.02, y: -5 }}
+    transition={{ type: "spring", stiffness: 300 }}
     className={cn(
-      "rounded-2xl border h-80  border-purple-500/20 bg-black/40 shadow-xl backdrop-blur-sm",
+      "rounded-xl border h-80 border-zinc-800 bg-zinc-900/50 shadow-xl backdrop-blur-sm hover:border-zinc-700 transition-all duration-300",
       className
     )}
     {...props}
   />
 ));
 
-// Main Dashboard Component
 const Dashboard = () => {
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    fetch('https://m-ock-pro-backend.vercel.app/api/items') // backend URL
-      .then((res) => res.json())
-      .then((data) => setItems(data))
-      .catch((err) => console.error('Error fetching data:', err));
-  }, []);
+  const [item, setItem] = useState(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [robotActive, setRobotActive] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [interviewStarted, setInterviewStarted] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/database/items');
+        const data = await response.json();
+        setItem(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load interview data. Please try again later.');
+        setItem(null);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleStartInterview = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setError('Please enter your name to start the interview');
+      return;
+    }
 
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch("https://m-ock-pro-backend.vercel.app/api/vapi/generate-text", {
         method: "POST",
@@ -62,75 +80,200 @@ const Dashboard = () => {
       });
 
       const data = await response.json();
-      console.log("API Response:", data); // You can use this to update state and show it
+      console.log("API Response:", data);
+      setRobotActive(true);
+      setShowConfetti(true);
+      setInterviewStarted(true);
+      setCurrentStep(1);
+      setTimeout(() => {
+        setRobotActive(false);
+        setShowConfetti(false);
+      }, 2000);
     } catch (error) {
       console.error("Error:", error);
+      setError('Failed to start interview. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:6rem_6rem]" />
+    <div className="h-screen bg-black text-white relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:6rem_6rem]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/10 via-transparent to-zinc-900/50" />
+      </div>
+
+      {/* Confetti Effect */}
+      <AnimatePresence>
+        {showConfetti && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none z-50"
+          >
+            {[...Array(50)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ y: -100, x: Math.random() * window.innerWidth, rotate: 0 }}
+                animate={{ 
+                  y: window.innerHeight + 100,
+                  x: Math.random() * window.innerWidth,
+                  rotate: 360
+                }}
+                transition={{ 
+                  duration: Math.random() * 2 + 1,
+                  repeat: 0,
+                  ease: "linear"
+                }}
+                className="absolute w-2 h-2 bg-white rounded-full"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: 0,
+                  opacity: Math.random()
+                }}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Welcome Screen */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="text-center"
+            >
+              <h1 className="text-6xl font-bold mb-4">Welcome to MockPro</h1>
+              <p className="text-xl text-zinc-400 mb-8">Your AI Interview Practice Platform</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowWelcome(false)}
+                className="bg-white text-black px-8 py-3 rounded-lg font-semibold"
+              >
+                Get Started
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content */}
-      <div className="relative z-10 p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-         
+      <div className="relative z-10 h-full flex items-center justify-center">
+        <div className="max-w-5xl w-full p-8">
           {/* Interview Generation Section */}
-          <div className="mb-12 ">
-          {items.map((item)=>{
-            <div key={item._id} className='flex  justify-between px-10 py-5 mt-16'>
-          <h1 className='text-2xl italic font-semibold text-zinc-300'></h1>
-          <h3 className='bg-zinc-900 rounded-xl px-4 py-2'>{item.type}</h3>
-          </div>
-          })}
-           
+          <div className="mb-12">
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-900/20 border border-red-900/50 text-red-200 p-4 rounded-lg mb-6 text-center"
+              >
+                {error}
+              </motion.div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8  ">
-              {/* AI Interviewer Card */}
-              <Card className="p-8 flex flex-col items-center justify-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center mb-6 shadow-lg overflow-hidden">
-                  <svg viewBox="0 0 24 24" className="w-12 h-12 text-white" fill="none" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 3.75H6.75a3 3 0 0 0-3 3v2.25M9 20.25H6.75a3 3 0 0 1-3-3V15M20.25 3.75h-2.25a3 3 0 0 0-3 3v2.25M20.25 20.25h-2.25a3 3 0 0 1-3-3V15M3.75 9h16.5M3.75 15h16.5M12 3.75v16.5M8.25 6.75h1.5M8.25 16.5h1.5M14.25 6.75h1.5M14.25 16.5h1.5" />
-                  </svg>
+            {item ? (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col gap-4 px-10 py-5 mt-8 bg-zinc-900/50 rounded-xl backdrop-blur-sm border border-zinc-800"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-white">{item.role}</h2>
+                    <p className='text-sm text-zinc-400'>{item.level}</p>
+                  </div>
+                  <span className="bg-zinc-800 rounded-lg px-4 py-2 border border-zinc-700">
+                    {item.type}
+                  </span>
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-200">AI Interviewer</h3>
-                <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full" />
+              </motion.div>
+            ) : (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-zinc-600"></div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+              {/* AI Interviewer Card */}
+              <Card className="p-8 flex flex-col items-center justify-center group">
+                <motion.div 
+                  className="w-40 h-40 object-fit rounded-full bg-zinc-800 flex items-center justify-center mb-6 overflow-hidden group-hover:bg-zinc-900 transition-all duration-300"
+                  animate={robotActive ? {
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 5, -5, 0],
+                    transition: {
+                      duration: 0.5,
+                      times: [0, 0.2, 0.5, 1]
+                    }
+                  } : {}}
+                >
+                  <img className='w-40 h-40 object-contain' src='/src/assets/robo.png' alt="AI Interviewer"/>
+                </motion.div>
+                <h3 className="text-xl font-semibold mb-2 text-white">AI Interviewer</h3>
+                <div className="w-12 h-1 bg-zinc-700 rounded-full" />
               </Card>
 
               {/* User Card */}
-              <Card className="p-8 flex flex-col items-center justify-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center mb-6 shadow-lg overflow-hidden">
-                  <svg viewBox="0 0 24 24" className="w-12 h-12 text-white" fill="none" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                  </svg>
+              <Card className="p-8 flex flex-col items-center justify-center group">
+                <div className="w-40 h-40 object-fit rounded-full bg-zinc-800 flex items-center justify-center mb-6 overflow-hidden group-hover:bg-zinc-700 transition-all duration-300">
+                  <img className='w-40 h-40 object-contain' src='/src/assets/avatar.png' alt="User Avatar"/>
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-200">You</h3>
-                <div className="w-12 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full" />
+                <h3 className="text-xl font-semibold mb-2 text-white">You</h3>
+                <div className="w-12 h-1 bg-zinc-700 rounded-full" />
               </Card>
             </div>
 
             {/* Input Section */}
-            <div className="mt-12 max-w-xl mx-auto">
-              <div className="backdrop-blur-sm bg-black/20 rounded-2xl p-6 shadow-xl">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-12 max-w-xl mx-auto"
+            >
+              <div className="backdrop-blur-sm bg-znc-900/50 rounded-xl p-6 shadow-xl  ">
                 <Input
                   type="text"
-                  placeholder="My name is John Doe, nice to meet you!"
+                  placeholder="Enter your name to start the interview..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="mb-6"
+                  disabled={loading}
                 />
                 <div className="flex justify-center">
-                  <MagneticButton size="lg" onClick={handleStartInterview} disabled={loading}>
-                    {loading ? "Starting..." : "Start Interview"}
+                  <MagneticButton 
+                    size="lg" 
+                    onClick={handleStartInterview} 
+                    disabled={loading || !name.trim()}
+                    className={cn(
+                      "transition-all duration-300",
+                      (!name.trim() || loading) && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                        Starting...
+                      </span>
+                    ) : (
+                      "Start Interview"
+                    )}
                   </MagneticButton>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -138,8 +281,6 @@ const Dashboard = () => {
   );
 };
 
-// Add display names for components
-// MagneticButton.displayName = "Button";
 Input.displayName = "Input";
 Card.displayName = "Card";
 

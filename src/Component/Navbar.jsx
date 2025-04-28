@@ -12,7 +12,7 @@ const Navbar = () => {
     <>
      
 
-     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 shadow-lg">
+     <nav className=" bg-gradient-to-b from-black to-[#0a0a0a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo and Mobile Menu Button */}
