@@ -49,7 +49,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://m-ock-pro-backend.vercel.app/api/database/items');
+        const response = await fetch('http://localhost:5000/api/database/items');
         const data = await response.json();
         setItem(data);
         setError(null);
