@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import MagneticButton from './MagneticButton';
-import { motion, AnimatePresence } from 'framer-motion';
+import MagneticButton from "./MagneticButton";
+import { motion, AnimatePresence } from "framer-motion";
 
 const cn = (...inputs) => {
   return twMerge(clsx(inputs));
@@ -37,7 +38,7 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
 
 const Dashboard = () => {
   const [item, setItem] = useState(null);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [robotActive, setRobotActive] = useState(false);
@@ -45,53 +46,63 @@ const Dashboard = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/database/items');
+        const response = await fetch(
+          "http://localhost:5000/api/database/items"
+        );
         const data = await response.json();
         setItem(data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load interview data. Please try again later.');
+        console.error("Error fetching data:", err);
+        setError("Failed to load interview data. Please try again later.");
         setItem(null);
       }
     };
     fetchData();
   }, []);
 
-  const handleStartInterview = async () => {
+  const handleStartInterview = () => {
     if (!name.trim()) {
-      setError('Please enter your name to start the interview');
+      setError("Please enter your name to start the interview");
       return;
     }
 
-    setLoading(true);
-    setError(null);
     try {
-      const response = await fetch("https://m-ock-pro-backend.vercel.app/api/vapi/generate-text", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name })
-      });
-
-      const data = await response.json();
-      console.log("API Response:", data);
-      setRobotActive(true);
-      setShowConfetti(true);
-      setInterviewStarted(true);
-      setCurrentStep(1);
-      setTimeout(() => {
-        setRobotActive(false);
-        setShowConfetti(false);
-      }, 2000);
+      const startInterview = async () => {
+        setCallStatus("CONNECTING");
+        const vapi = getVapiInstance();
+        await vapi.start(interviewer, {
+          variableValues: { questions: formattedQuestions },
+        });
+      };
+      // const response = await fetch(
+      //   "https://m-ock-pro-backend.vercel.app/api/vapi/generate-text",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({ name }),
+      //   }
+      // );
+      // const data = await response.json();
+      // console.log("API Response:", data);
+      // setRobotActive(true);
+      // setShowConfetti(true);
+      // setInterviewStarted(true);
+      // setCurrentStep(1);
+      // setTimeout(() => {
+      //   setRobotActive(false);
+      //   setShowConfetti(false);
+      // }, 2000);
     } catch (error) {
       console.error("Error:", error);
-      setError('Failed to start interview. Please try again.');
+      setError("Failed to start interview. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -117,55 +128,29 @@ const Dashboard = () => {
             {[...Array(50)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{ y: -100, x: Math.random() * window.innerWidth, rotate: 0 }}
-                animate={{ 
+                initial={{
+                  y: -100,
+                  x: Math.random() * window.innerWidth,
+                  rotate: 0,
+                }}
+                animate={{
                   y: window.innerHeight + 100,
                   x: Math.random() * window.innerWidth,
-                  rotate: 360
+                  rotate: 360,
                 }}
-                transition={{ 
+                transition={{
                   duration: Math.random() * 2 + 1,
                   repeat: 0,
-                  ease: "linear"
+                  ease: "linear",
                 }}
                 className="absolute w-2 h-2 bg-white rounded-full"
                 style={{
                   left: `${Math.random() * 100}%`,
                   top: 0,
-                  opacity: Math.random()
+                  opacity: Math.random(),
                 }}
               />
             ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Welcome Screen */}
-      <AnimatePresence>
-        {showWelcome && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="text-center"
-            >
-              <h1 className="text-6xl font-bold mb-4">Welcome to MockPro</h1>
-              <p className="text-xl text-zinc-400 mb-8">Your AI Interview Practice Platform</p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowWelcome(false)}
-                className="bg-white text-black px-8 py-3 rounded-lg font-semibold"
-              >
-                Get Started
-              </motion.button>
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -176,7 +161,7 @@ const Dashboard = () => {
           {/* Interview Generation Section */}
           <div className="mb-12">
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-red-900/20 border border-red-900/50 text-red-200 p-4 rounded-lg mb-6 text-center"
@@ -186,15 +171,17 @@ const Dashboard = () => {
             )}
 
             {item ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="flex flex-col gap-4 px-10 py-5 mt-8 bg-zinc-900/50 rounded-xl backdrop-blur-sm border border-zinc-800"
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-2xl font-semibold text-white">{item.role}</h2>
-                    <p className='text-sm text-zinc-400'>{item.level}</p>
+                    <h2 className="text-2xl font-semibold text-white">
+                      {item.role}
+                    </h2>
+                    <p className="text-sm text-zinc-400">{item.level}</p>
                   </div>
                   <span className="bg-zinc-800 rounded-lg px-4 py-2 border border-zinc-700">
                     {item.type}
@@ -210,27 +197,41 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
               {/* AI Interviewer Card */}
               <Card className="p-8 flex flex-col items-center justify-center group">
-                <motion.div 
+                <motion.div
                   className="w-40 h-40 object-fit rounded-full bg-zinc-800 flex items-center justify-center mb-6 overflow-hidden group-hover:bg-zinc-900 transition-all duration-300"
-                  animate={robotActive ? {
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0],
-                    transition: {
-                      duration: 0.5,
-                      times: [0, 0.2, 0.5, 1]
-                    }
-                  } : {}}
+                  animate={
+                    robotActive
+                      ? {
+                          scale: [1, 1.1, 1],
+                          rotate: [0, 5, -5, 0],
+                          transition: {
+                            duration: 0.5,
+                            times: [0, 0.2, 0.5, 1],
+                          },
+                        }
+                      : {}
+                  }
                 >
-                  <img className='w-40 h-40 object-contain' src='/src/assets/robo.png' alt="AI Interviewer"/>
+                  <img
+                    className="w-40 h-40 object-contain"
+                    src="/src/assets/robo.png"
+                    alt="AI Interviewer"
+                  />
                 </motion.div>
-                <h3 className="text-xl font-semibold mb-2 text-white">AI Interviewer</h3>
+                <h3 className="text-xl font-semibold mb-2 text-white">
+                  AI Interviewer
+                </h3>
                 <div className="w-12 h-1 bg-zinc-700 rounded-full" />
               </Card>
 
               {/* User Card */}
               <Card className="p-8 flex flex-col items-center justify-center group">
                 <div className="w-40 h-40 object-fit rounded-full bg-zinc-800 flex items-center justify-center mb-6 overflow-hidden group-hover:bg-zinc-700 transition-all duration-300">
-                  <img className='w-40 h-40 object-contain' src='/src/assets/avatar.png' alt="User Avatar"/>
+                  <img
+                    className="w-40 h-40 object-contain"
+                    src="/src/assets/avatar.png"
+                    alt="User Avatar"
+                  />
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-white">You</h3>
                 <div className="w-12 h-1 bg-zinc-700 rounded-full" />
@@ -238,7 +239,7 @@ const Dashboard = () => {
             </div>
 
             {/* Input Section */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mt-12 max-w-xl mx-auto"
@@ -252,25 +253,26 @@ const Dashboard = () => {
                   className="mb-6"
                   disabled={loading}
                 />
-                <div className="flex justify-center">
-                  <MagneticButton 
-                    size="lg" 
-                    onClick={handleStartInterview} 
+                <div className="flex justify-center rounded-lg bg-blue-500 p-4">
+                  <button
+                    size="lg"
+                    onClick={handleStartInterview}
                     disabled={loading || !name.trim()}
                     className={cn(
                       "transition-all duration-300",
-                      (!name.trim() || loading) && "opacity-50 cursor-not-allowed"
+                      (!name.trim() || loading) &&
+                        "opacity-50 cursor-not-allowed"
                     )}
                   >
                     {loading ? (
                       <span className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white "></div>
                         Starting...
                       </span>
                     ) : (
                       "Start Interview"
                     )}
-                  </MagneticButton>
+                  </button>
                 </div>
               </div>
             </motion.div>
