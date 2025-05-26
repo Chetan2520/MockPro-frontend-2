@@ -36,13 +36,13 @@ const features = [
 
 const Features = () => {
   return (
-    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-black via-black ">
+    <section className="py-20 relative overflow-hidden bg-black ">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Animated Gradient Orbs */}
-        <div className="absolute -top-40 left-1/2 w-80 h-80 bg-gradient-to-r fromslate-800/30 to-gray-800/30 rounded-full blur-3xl animate-float-slow"></div>
-        <div className="absolute top-1/2 -right-40 w-80 h-80 bg-gradient-to-r from-zinc-800/30 to-neutral-800/30 rounded-full blur-3xl animate-float-medium"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-stone-800/30 to-slate-800/30 rounded-full blur-3xl animate-float-fast"></div>
+        <div className="absolute -top-40 left-1/2 w-80 h-80 bg-black rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute top-1/2 -right-40 w-80 h-80 bg-gradient-to-r from-zinc-100/10 to-neutral-800/30 rounded-full blur-3xl animate-float-medium"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-zinc-100/10 to-neutral-800/30 rounded-full blur-3xl animate-float-fast"></div>
         
         {/* Animated Grid Pattern */}
         <div className="absolute inset-0 opacity-5">

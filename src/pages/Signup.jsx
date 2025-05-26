@@ -104,6 +104,7 @@ const Signup = () => {
             >
               Password
             </label>
+            
             <input
               type="password"
               id="password"

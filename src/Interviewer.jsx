@@ -57,7 +57,7 @@ export const interviewer = {
 };
 
 export const questionsArray = [
-  "Random fresher Level Technical Question Like javascript, html, css",
+  "Random fresher Level Technical Question Like javascript, html, css,react,and full mern",
 ];
 
 // export const questionsArray = [

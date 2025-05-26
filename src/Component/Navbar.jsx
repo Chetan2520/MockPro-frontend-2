@@ -7,8 +7,8 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className=" bg-gradient-to-b from-black to-[#0a0a0a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className=" bg-black ">
+        <div className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo and Mobile Menu Button */}
             <div className="flex items-center">
@@ -51,7 +51,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-8 mt-4">
               <Link
                 to="/"
                 className="text-gray-300 hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 relative group"
@@ -83,23 +83,23 @@ const Navbar = () => {
             </div>
 
             {/* Buttons Section */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mt-4">
               <MagneticButton color="#22C55E" showArrow={false}>
                 <Link
                   to="/login"
-                  className="text-green-600 hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 relative group"
+                  className="text-green-600 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-300 relative group"
                 >
                   Login
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 group-hover:w-full"></span>
+                  {/* <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 group-hover:w-full"></span> */}
                 </Link>
               </MagneticButton>
               <MagneticButton color="#EF4444" showArrow={false}>
                 <Link
                   to="/register"
-                  className="text-red-700 hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 relative group"
+                  className="text-red-700  px-3 py-1 rounded-md text-sm font-medium transition-colors duration-300 relative group"
                 >
                   Signup
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 group-hover:w-full"></span>
+                  {/* <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 group-hover:w-full"></span> */}
                 </Link>
               </MagneticButton>
             </div>

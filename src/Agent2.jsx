@@ -148,7 +148,7 @@ const Agent2 = () => {
 };
 
 const ProfileCard = ({ name, img, isSpeaking }) => (
-  <div className="flex flex-col items-center gap-3 p-4 border rounded-xl shadow-md bg-white w-60">
+  <div className="flex flex-col items-center gap-3 p-4 border rounded-xl shadow-md bg-black text-zinc-100 w-60">
     <div className="relative">
       <img
         src={img}
@@ -159,7 +159,7 @@ const ProfileCard = ({ name, img, isSpeaking }) => (
         <span className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full animate-ping"></span>
       )}
     </div>
-    <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
+    <h3 className="text-lg font-semibold text-gray-100">{name}</h3>
   </div>
 );
 
